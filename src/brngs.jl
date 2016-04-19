@@ -1,0 +1,18 @@
+@enum(BasicRandomNumberGenerator,
+      MCG31         = 0x00100000,
+      R250          = 0x00200000,
+      MRG32K3A      = 0x00300000,
+      MCG59         = 0x00400000,
+      WH            = 0x00500000,
+      SOBOL         = 0x00600000,
+      NIEDERR       = 0x00700000,
+      MT19937       = 0x00800000,
+      MT2203        = 0x00900000,
+#      IABSTRACT     = 0x00a00000,
+#      DABSTRACT     = 0x00b00000,
+#      SABSTRACT     = 0x00c00000,
+      SFMT19937     = 0x00d00000,
+      NONDETERM     = 0x00e00000,
+      ARS5          = 0x00f00000,
+      PHILOX4X32X10 = 0x01000000
+)
