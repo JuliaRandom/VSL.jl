@@ -8,10 +8,19 @@ module VSL
     
     export BasicRandomNumberGenerator
 
+    export VSL_RNG_METHOD_STD, VSL_RNG_METHOD_BOXMULLER, VSL_RNG_METHOD_BOXMULLER2, VSL_RNG_METHOD_ICDF,
+           VSL_RNG_METHOD_GNORM, VSL_RNG_METHOD_CJA, VSL_RNG_METHOD_BTPE, VSL_RNG_METHOD_H2PE, VSL_RNG_METHOD_PTPE,
+           VSL_RNG_METHOD_POISNORM, VSL_RNG_METHOD_NBAR, VSL_RNG_METHOD_STD_ACCURATE,
+           VSL_RNG_METHOD_BOXMULLER2_ACCURATE, VSL_RNG_METHOD_ICDF_ACCURATE, VSL_RNG_METHOD_GNORM_ACCURATE, 
+           VSL_RNG_METHOD_CJA_ACCURATE
+
+    export VSLDistribution, Uniform
+
     const libmkl = :libmkl_rt
 
     include("errors.jl")
     include("brngs.jl")
     include("methods.jl")
+    include("distributions.jl")
 
 end
