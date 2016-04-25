@@ -1,1 +1,2 @@
-using VSL
+include("common.jl")
+include("test_brng.jl")

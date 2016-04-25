@@ -8,7 +8,7 @@ type VSLError <: Exception
     message :: AbstractString
 end
 show(io::IO, E::VSLError) = print(io, string("VSL Error: ", strerror(E.errno), " -- ", E.message))
-VSL_ERROR{T<:Integer}(errno::T) = VSLError(errno, _vsl_errors[errno])
+VSL_ERROR(errno::Integer) = VSLError(errno, _vsl_errors[errno])
 
 @vsl_error VSL_STATUS_OK = 0
 
