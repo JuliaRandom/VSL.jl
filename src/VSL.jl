@@ -16,9 +16,11 @@ module VSL
 
     export MatrixStorageType, VSL_MATRIX_STORAGE_FULL, VSL_MATRIX_STORAGE_PACKED, VSL_MATRIX_STORAGE_DIAGONAL
 
-    export VSLDistribution, VSLContinuousDistribution, 
+    export VSLDistribution, VSLContinuousDistribution, VSLDiscreteDistribution,
            Uniform, Gaussian, GaussianMV, Exponential, Laplace, Weibull, Cauchy, Rayleigh, Lognormal,
-           Gumbel, Gamma, Beta
+           Gumbel, Gamma, Beta,
+           UniformDiscrete, UniformBits, UniformBits32, UniformBits64, Bernoulli, Geometric, Binomial, Hypergeometric,
+           Poisson, PoissonV, NegBinomial
 
     const libmkl = :libmkl_rt
 
@@ -29,5 +31,6 @@ module VSL
     abstract VSLDistribution <: AbstractRNG
 
     include("continuous_distributions.jl")
+    include("discrete_distributions.jl")
 
 end

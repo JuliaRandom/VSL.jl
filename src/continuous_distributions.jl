@@ -4,8 +4,8 @@ abstract VSLContinuousDistribution <: VSLDistribution
 
 macro vsl_distribution_continuous(name, methods, properties...)
     t2 = :(Union{})
-    methods_symbol = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
-    for method in methods_symbol
+    method_symbols = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
+    for method in method_symbols
         push!(t2.args, method)
     end
     code = quote
@@ -20,7 +20,7 @@ macro vsl_distribution_continuous(name, methods, properties...)
     push!(fields, :(method::Type{T2}))
     default_constractor = :(
         $name{T1<:Union{Cfloat, Cdouble}}(brng::BasicRandomNumberGenerator, $(properties...)) =
-        $name(brng, $([property.args[1] for property in properties]...), $(methods_symbol[1]))
+        $name(brng, $([property.args[1] for property in properties]...), $(method_symbols[1]))
     )
     push!(code.args, default_constractor)
     esc(code)
