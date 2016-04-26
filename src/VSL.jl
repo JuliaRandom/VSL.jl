@@ -14,7 +14,9 @@ module VSL
            VSL_RNG_METHOD_BOXMULLER2_ACCURATE, VSL_RNG_METHOD_ICDF_ACCURATE, VSL_RNG_METHOD_GNORM_ACCURATE, 
            VSL_RNG_METHOD_CJA_ACCURATE
 
-    export VSLDistribution, Uniform
+    export MatrixStorageType, VSL_MATRIX_STORAGE_FULL, VSL_MATRIX_STORAGE_PACKED, VSL_MATRIX_STORAGE_DIAGONAL
+
+    export VSLDistribution, Uniform, Gaussian, GaussianMV
 
     const libmkl = :libmkl_rt
 
