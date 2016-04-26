@@ -17,7 +17,7 @@ brng = BasicRandomNumberGenerator(VSL_BRNG_MT19937, 12345)
 # A BRNG created, in which 12345 is the random seed.
 u = Uniform(brng, 0.0, 1.0) # Create a uniform distribution between 0.0 and 1.0.
 rand(u) # Generate one random number.
-rand(u, 2, 3) # Generate an 2*3 array filled by random numbers.
+rand(u, 2, 3) # Generate an random 2*3 array.
 A = Array(Float64, 3, 4)
 rand!(A) # Fill an array with random numbers.
 ```
