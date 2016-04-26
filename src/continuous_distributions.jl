@@ -2,7 +2,7 @@ import Base.Random: rand
 
 abstract VSLContinuousDistribution <: VSLDistribution
 
-macro vsl_distribution_continuous(name, methods, fields...)
+macro vsl_distribution_continuous(name, methods, properties...)
     t2 = :(Union{})
     methods_symbol = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for method in methods_symbol
@@ -13,10 +13,16 @@ macro vsl_distribution_continuous(name, methods, fields...)
             brng::BasicRandomNumberGenerator
         end
     end
-    for field in fields
-        push!(code.args[2].args[end].args, field)
+    fields = code.args[2].args[end].args
+    for property in properties
+        push!(fields, property)
     end
-    push!(code.args[2].args[end].args, :(method::Type{T2}))
+    push!(fields, :(method::Type{T2}))
+    default_constractor = :(
+        $name{T1<:Union{Cfloat, Cdouble}}(brng::BasicRandomNumberGenerator, $(properties...)) =
+        $name(brng, $([property.args[1] for property in properties]...), $(methods_symbol[1]))
+    )
+    push!(code.args, default_constractor)
     esc(code)
 end
 
