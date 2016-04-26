@@ -24,7 +24,7 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
     code = quote end
     method_symbols = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for ttype in (:Cfloat, :Cdouble)
-        ctype = ttype == :Cfloat ? 'f' : 'd'
+        ctype = ttype == :Cfloat ? 's' : 'd'
         argtypes = [atype == :T1 ? ttype : atype for atype in types.args]
         function_name = "v$(ctype)Rng$(name)"
         for (method, constant) in zip(method_symbols, method_constants.args)
@@ -45,6 +45,10 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
                           $constant, d.brng.stream_state[1], n, A, $(arguments.args...))
                     A
                 end)
+            )
+            push!(
+                code.args,
+                :(rand(d::$name{$ttype, $method}, dims::Dims) = rand!(d, Array($ttype, dims)))
             )
         end
     end

@@ -52,5 +52,7 @@ type BasicRandomNumberGenerator
         BasicRandomNumberGenerator(brng_type, UInt(seed))
     BasicRandomNumberGenerator{T<:Integer}(brng_type::BRNGType, seed::Vector{T}) =
         BasicRandomNumberGenerator(brng_type, Vector{Cuint}(seed))
+    BasicRandomNumberGenerator(brng_type::BRNGType) =
+        BasicRandomNumberGenerator(brng_type, rand(RandomDevice()))
 end
 
