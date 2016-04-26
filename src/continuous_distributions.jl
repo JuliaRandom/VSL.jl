@@ -1,6 +1,6 @@
 import Base.Random: rand
 
-abstract VSLDistribution <: AbstractRNG
+abstract VSLContinuousDistribution <: VSLDistribution
 
 macro vsl_distribution_continuous(name, methods, fields...)
     t2 = :(Union{})
@@ -9,14 +9,14 @@ macro vsl_distribution_continuous(name, methods, fields...)
         push!(t2.args, method)
     end
     code = quote
-        immutable $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLDistribution
+        immutable $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
             brng::BasicRandomNumberGenerator
-            method::Type{T2}
         end
     end
     for field in fields
         push!(code.args[2].args[end].args, field)
     end
+    push!(code.args[2].args[end].args, :(method::Type{T2}))
     esc(code)
 end
 
@@ -146,3 +146,143 @@ end
     [Int(d.mstorage), d.a, d.t]
 )
 
+@vsl_distribution_continuous(
+    Exponential,
+    [ICDF, ICDF_ACCURATE],
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Exponential,
+    [ICDF, ICDF_ACCURATE],
+    [0x00000000, 0x40000000],
+    [T1, T1],
+    [d.a, d.β]
+)
+
+@vsl_distribution_continuous(
+    Laplace,
+    [ICDF],
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Laplace,
+    [ICDF],
+    [0x00000000],
+    [T1, T1],
+    [d.a, d.β]
+)
+
+@vsl_distribution_continuous(
+    Weibull,
+    [ICDF, ICDF_ACCURATE],
+    α::T1,
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Weibull,
+    [ICDF, ICDF_ACCURATE],
+    [0x00000000, 0x40000000],
+    [T1, T1, T1],
+    [d.α, d.a, d.β]
+)
+
+@vsl_distribution_continuous(
+    Cauchy,
+    [ICDF],
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Cauchy,
+    [ICDF],
+    [0x00000000],
+    [T1, T1],
+    [d.a, d.β]
+)
+
+@vsl_distribution_continuous(
+    Rayleigh,
+    [ICDF, ICDF_ACCURATE],
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Rayleigh,
+    [ICDF, ICDF_ACCURATE],
+    [0x00000000, 0x40000000],
+    [T1, T1],
+    [d.a, d.β]
+)
+
+@vsl_distribution_continuous(
+    Lognormal,
+    [BOXMULLER2, BOXMULLER2_ACCURATE, ICDF, ICDF_ACCURATE],
+    a::T1,
+    σ::T1,
+    b::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Lognormal,
+    [BOXMULLER2, BOXMULLER2_ACCURATE, ICDF, ICDF_ACCURATE],
+    [0x00000000, 0x40000000, 0x00000001, 0x40000001],
+    [T1, T1, T1, T1],
+    [d.a, d.σ, d.b, d.β]
+)
+
+@vsl_distribution_continuous(
+    Gumbel,
+    [ICDF],
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Gumbel,
+    [ICDF],
+    [0x00000000],
+    [T1, T1],
+    [d.a, d.β]
+)
+
+@vsl_distribution_continuous(
+    Gamma,
+    [GNORM, GNORM_ACCURATE],
+    α::T1,
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Gamma,
+    [GNORM, GNORM_ACCURATE],
+    [0x00000000, 0x40000000],
+    [T1, T1, T1],
+    [d.α, d.a, d.β]
+)
+
+@vsl_distribution_continuous(
+    Beta,
+    [CJA, CJA_ACCURATE],
+    p::T1,
+    q::T1,
+    a::T1,
+    β::T1
+)
+
+@register_rand_functions_continuous(
+    Beta,
+    [CJA, CJA_ACCURATE],
+    [0x00000000, 0x40000000],
+    [T1, T1, T1, T1],
+    [d.p, d.q, d.a, d.β]
+)
