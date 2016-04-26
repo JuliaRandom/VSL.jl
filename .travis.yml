@@ -10,5 +10,5 @@ before_install:
 script:
     - julia -e 'Pkg.clone(pwd()); Pkg.test("VSL", coverage=true)'
 
-#after_success:
-#    - julia -e 'cd(Pkg.dir("VSL")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+after_success:
+    - julia -e 'cd(Pkg.dir("VSL")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
