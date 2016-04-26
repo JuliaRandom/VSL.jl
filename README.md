@@ -44,11 +44,11 @@ Use the Enum `BRNGType` to set the type of BRNG.
 
 ### Supported distributions
 
-Contigurous: Uniform, Gaussian, GaussianMV, Exponential, Laplace, Weibull, Cauchy, Rayleigh, Lognormal,
-    Gumbel, Gamma, Beta
+Contigurous: `Uniform`, `Gaussian`, `GaussianMV`, `Exponential`, `Laplace`,
+    `Weibull`, `Cauchy`, `Rayleigh`, `Lognormal`, `Gumbel`, `Gamma`, `Beta`
 
-Discrete: UniformDiscrete, UniformBits, UniformBits32, UniformBits64, Bernoulli, Geometric, Binomial,
-    Hypergeometric, Poisson, PoissonV, NegBinomial
+Discrete: `UniformDiscrete`, `UniformBits`, `UniformBits32`, `UniformBits64`, `Bernoulli`,
+    `Geometric`, `Binomial`, `Hypergeometric`, `Poisson`, `PoissonV`, `NegBinomial`
 
 ### Notes
 
