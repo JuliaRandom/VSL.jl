@@ -1,10 +1,19 @@
+language: julia
+julia:
+    - 0.4
+    - nightly
 sudo: required
 dist: trusty
+
 notification: 
     email: false
 
 before_install:
-    - wget -q -O /dev/stdout "https://raw.githubusercontent.com/sunoru/julia-icc-travis/master/install-julia.sh" | bash
+    - wget -q -O /tmp/install-icc.sh \
+        "https://raw.githubusercontent.com/sunoru/julia-icc-travis/master/install-icc.sh"
+    - chmod 755 /tmp/install-icc.sh
+    - sudo /tmp/install-icc.sh --components mkl --dest /opt/intel --tmpdir /root/tmp || exit 1
+    # only install mkl
     - . ~/.bashrc
 
 script:
