@@ -1,5 +1,5 @@
 brng_type = VSL_BRNG_MT19937
-println("Testing continuous distributions with $brng_type...")
+info("Testing continuous distributions with $brng_type...")
 brng = BasicRandomNumberGenerator(brng_type, 200701281)
 
 t_uniform = Uniform(brng, 1.0, 5.0, VSL_RNG_METHOD_STD)

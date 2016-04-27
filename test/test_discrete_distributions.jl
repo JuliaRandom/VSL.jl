@@ -1,5 +1,5 @@
 brng_type = VSL_BRNG_ARS5 
-println("Testing discrete distributions with $brng_type...")
+info("Testing discrete distributions with $brng_type...")
 brng = BasicRandomNumberGenerator(brng_type, 200701281)
 
 t_uniform = UniformDiscrete(brng, Cint(1), Cint(10))
