@@ -4,7 +4,7 @@ abstract VSLDiscreteDistribution <: VSLDistribution
 
 macro vsl_distribution_discrete(name, methods, properties...)
     t = :(Union{})
-    method_symbols = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
+    method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for method in method_symbols
         push!(t.args, method)
     end
@@ -28,7 +28,7 @@ end
 
 macro register_rand_functions_discrete(typename, name, methods, method_constants, rtype, types, arguments)
     code = quote end
-    method_symbols = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
+    method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     function_name = "viRng$(name)"
     for (method, constant) in zip(method_symbols, method_constants.args)
         push!(

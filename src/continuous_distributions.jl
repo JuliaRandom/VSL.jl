@@ -4,7 +4,7 @@ abstract VSLContinuousDistribution <: VSLDistribution
 
 macro vsl_distribution_continuous(name, methods, properties...)
     t2 = :(Union{})
-    method_symbols = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
+    method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for method in method_symbols
         push!(t2.args, method)
     end
@@ -28,7 +28,7 @@ end
 
 macro register_rand_functions_continuous(name, methods, method_constants, types, arguments)
     code = quote end
-    method_symbols = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
+    method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for ttype in (:Cfloat, :Cdouble)
         ctype = ttype == :Cfloat ? 's' : 'd'
         argtypes = [atype == :T1 ? ttype : atype for atype in types.args]
@@ -63,7 +63,7 @@ end
 
 macro register_rand_functions_continuous_multivariate(name, methods, method_constants, types, arguments)
     code = quote end
-    method_symbols = [symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
+    method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for ttype in (:Cfloat, :Cdouble)
         ctype = ttype == :Cfloat ? 's' : 'd'
         argtypes = [parse(replace("$atype", "T1", "$ttype")) for atype in types.args]
