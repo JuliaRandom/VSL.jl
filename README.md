@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/sunoru/VSL.jl.svg?branch=master)](https://travis-ci.org/sunoru/VSL.jl)
 [![codecov](https://codecov.io/gh/sunoru/VSL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sunoru/VSL.jl)
 
-This package provide bindings to the Intel Vector Statistics Library.
+This package provides bindings to the Intel Vector Statistics Library.
 
 ## Using VSL.jl
 
@@ -13,7 +13,7 @@ VML.jl provides several basic random number generators (BRNGs) and distributions
 one method to generate random number. After VSL.jl loaded, you can use the distributions such like the followings:
 
 ```julia
-using VSL.jl
+using VSL
 brng = BasicRandomNumberGenerator(VSL_BRNG_MT19937, 12345)
 # A BRNG created, in which 12345 is the random seed.
 u = Uniform(brng, 0.0, 1.0) # Create a uniform distribution between 0.0 and 1.0.
