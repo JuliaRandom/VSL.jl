@@ -11,6 +11,7 @@ macro vsl_distribution_continuous(name, methods, properties...)
     code = quote
         immutable $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
             brng::BasicRandomNumberGenerator
+            tmp::Vector{T1}
         end
     end
     fields = code.args[2].args[end].args
@@ -18,11 +19,17 @@ macro vsl_distribution_continuous(name, methods, properties...)
         push!(fields, property)
     end
     push!(fields, :(method::Type{T2}))
-    default_constractor = :(
+
+    push!(code.args, :(
+        $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2}(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T2}) =
+        $name(brng, [T1(0)], $([property.args[1] for property in properties]...), method)
+    ))
+
+    push!(code.args, :(
         $name{T1<:Union{Cfloat, Cdouble}}(brng::BasicRandomNumberGenerator, $(properties...)) =
         $name(brng, $([property.args[1] for property in properties]...), $(method_symbols[1]))
-    )
-    push!(code.args, default_constractor)
+    ))
+
     esc(code)
 end
 
@@ -37,10 +44,9 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
             push!(
                 code.args,
                 :(function rand(d::$name{$ttype, $method}, ::Type{$ttype}=$ttype)
-                    r = Vector{$ttype}(1)
                     ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, $(argtypes...)),
-                          $constant, d.brng.stream_state[1], 1, r, $(arguments.args...))
-                    r[1]
+                          $constant, d.brng.stream_state[1], 1, d.tmp, $(arguments.args...))
+                    d.tmp[1]
                 end)
             )
             push!(

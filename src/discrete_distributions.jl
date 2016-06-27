@@ -2,7 +2,7 @@ import Base.Random: rand
 
 abstract VSLDiscreteDistribution <: VSLDistribution
 
-macro vsl_distribution_discrete(name, methods, properties...)
+macro vsl_distribution_discrete(name, methods, rtype, properties...)
     t = :(Union{})
     method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for method in method_symbols
@@ -11,6 +11,7 @@ macro vsl_distribution_discrete(name, methods, properties...)
     code = quote
         immutable $name{T<:$t} <: VSLDiscreteDistribution 
             brng::BasicRandomNumberGenerator
+            tmp::Vector{$rtype}
         end
     end
     fields = code.args[2].args[end].args
@@ -18,11 +19,17 @@ macro vsl_distribution_discrete(name, methods, properties...)
         push!(fields, property)
     end
     push!(fields, :(method::Type{T}))
-    default_constractor = :(
+
+    push!(code.args, :(
+        $name{T<:$t}(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T}) =
+        $name(brng, [$rtype(0)], $([property.args[1] for property in properties]...), method)
+    ))
+
+    push!(code.args, :(
         $name(brng::BasicRandomNumberGenerator, $(properties...)) =
         $name(brng, $([property.args[1] for property in properties]...), $(method_symbols[1]))
-    )
-    push!(code.args, default_constractor)
+    ))
+
     esc(code)
 end
 
@@ -34,10 +41,9 @@ macro register_rand_functions_discrete(typename, name, methods, method_constants
         push!(
             code.args,
             :(function rand(d::$typename{$method}, ::Type{$rtype}=$rtype)
-                r = Vector{$rtype}(1)
                 ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$rtype}, $(types.args...)),
-                      $constant, d.brng.stream_state[1], 1, r, $(arguments.args...))
-                r[1]
+                      $constant, d.brng.stream_state[1], 1, d.tmp, $(arguments.args...))
+                d.tmp[1]
             end)
         )
         push!(
@@ -60,6 +66,7 @@ end
 @vsl_distribution_discrete(
     UniformDiscrete,
     [STD],
+    Cint,
     a::Cint,
     b::Cint
 )
@@ -77,6 +84,7 @@ end
 @vsl_distribution_discrete(
     UniformBits,
     [STD],
+    Cuint,
 )
 
 @register_rand_functions_discrete(
@@ -92,6 +100,7 @@ end
 @vsl_distribution_discrete(
     UniformBits32,
     [STD],
+    Cuint,
 )
 
 @register_rand_functions_discrete(
@@ -107,6 +116,7 @@ end
 @vsl_distribution_discrete(
     UniformBits64,
     [STD],
+    UInt64,
 )
 
 @register_rand_functions_discrete(
@@ -122,6 +132,7 @@ end
 @vsl_distribution_discrete(
     Bernoulli,
     [ICDF],
+    Cint,
     p::Cdouble
 )
 
@@ -138,6 +149,7 @@ end
 @vsl_distribution_discrete(
     Geometric,
     [ICDF],
+    Cint,
     p::Cdouble
 )
 
@@ -154,6 +166,7 @@ end
 @vsl_distribution_discrete(
     Binomial,
     [BTPE],
+    Cint,
     ntrial::Cint,
     p::Cdouble
 )
@@ -171,6 +184,7 @@ end
 @vsl_distribution_discrete(
     Hypergeometric,
     [H2PE],
+    Cint,
     l::Cint,
     s::Cint,
     m::Cint
@@ -189,6 +203,7 @@ end
 @vsl_distribution_discrete(
     Poisson,
     [PTPE, POISNORM],
+    Cint,
     λ::Cdouble
 )
 
@@ -205,6 +220,7 @@ end
 @vsl_distribution_discrete(
     PoissonV,
     [POISNORM],
+    Cint,
     λ::Vector{Cdouble}
 )
 
@@ -221,6 +237,7 @@ end
 @vsl_distribution_discrete(
     NegBinomial,
     [NBAR],
+    Cint,
     a::Cdouble,
     p::Cdouble
 )
