@@ -1,4 +1,4 @@
-import Base.Random: rand
+import Base.Random: rand, rand!
 
 abstract VSLContinuousDistribution <: VSLDistribution
 
