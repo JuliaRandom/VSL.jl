@@ -24,6 +24,8 @@ module VSL
 
     const libmkl = :libmkl_rt
 
+    const BUFFER_LENGTH = 16
+
     include("errors.jl")
     include("brngs.jl")
     include("methods.jl")

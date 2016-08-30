@@ -2,27 +2,30 @@ import Base.Random: rand, rand!
 
 abstract VSLContinuousDistribution <: VSLDistribution
 
-macro vsl_distribution_continuous(name, methods, properties...)
+macro vsl_distribution_continuous(name, methods, tmp, properties...)
     t2 = :(Union{})
     method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for method in method_symbols
         push!(t2.args, method)
     end
     code = quote
-        immutable $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
+        type $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
             brng::BasicRandomNumberGenerator
-            tmp::Vector{T1}
+            ii::Int
         end
     end
     fields = code.args[2].args[end].args
+    push!(fields, tmp)
     for property in properties
         push!(fields, property)
     end
     push!(fields, :(method::Type{T2}))
 
     push!(code.args, :(
-        $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2}(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T2}) =
-        $name(brng, [T1(0)], $([property.args[1] for property in properties]...), method)
+        function $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2}(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T2})
+            tmp = $(tmp.args[2].args[1] == :Vector ? :(Vector{T1}(BUFFER_LENGTH)) : :(Matrix{T1}(dimen, BUFFER_LENGTH)))
+            $name(brng, BUFFER_LENGTH, tmp, $([property.args[1] for property in properties]...), method)
+        end
     ))
 
     push!(code.args, :(
@@ -44,17 +47,29 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
             push!(
                 code.args,
                 :(function rand(d::$name{$ttype, $method}, ::Type{$ttype}=$ttype)
-                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, $(argtypes...)),
-                          $constant, d.brng.stream_state[1], 1, d.tmp, $(arguments.args...))
-                    d.tmp[1]
+                    d.ii += 1
+                    if d.ii > BUFFER_LENGTH
+                        ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, $(argtypes...)),
+                            $constant, d.brng.stream_state[1], BUFFER_LENGTH, d.tmp, $(arguments.args...))
+                        d.ii = 1
+                    end
+                    d.tmp[d.ii]
                 end)
             )
             push!(
                 code.args,
                 :(function rand!(d::$name{$ttype, $method}, A::Array{$ttype})
                     n = length(A)
+                    t = BUFFER_LENGTH - d.ii
+                    if n <= t
+                        copy!(A, 1, d.tmp, d.ii + 1, n)
+                        d.ii = d.ii + n
+                        return A
+                    end
+                    copy!(A, 1, d.tmp, d.ii + 1, t)
+                    d.ii = BUFFER_LENGTH
                     ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, $(argtypes...)),
-                          $constant, d.brng.stream_state[1], n, A, $(arguments.args...))
+                        $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))
                     A
                 end)
             )
@@ -78,26 +93,13 @@ macro register_rand_functions_continuous_multivariate(name, methods, method_cons
             push!(
                 code.args,
                 :(function rand(d::$name{$ttype, $method}, ::Type{Vector{$ttype}}=Vector{$ttype})
-                    r = Matrix{$ttype}(d.dimen, 1)
-                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, Int, $(argtypes...)),
-                          $constant, d.brng.stream_state[1], 1, r, d.dimen, $(arguments.args...))
-                    r[:, 1]
-                end)
-            )
-            push!(
-                code.args,
-                :(function rand!(d::$name{$ttype, $method}, A::Array{$ttype})
-                    n = length(A) ÷ d.dimen
-                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, Int, $(argtypes...)),
-                          $constant, d.brng.stream_state[1], n, A, d.dimen, $(arguments.args...))
-                    A
-                end)
-            )
-            push!(
-                code.args,
-                :(function rand(d::$name{$ttype, $method}, dims::Dims)
-                    A = Array{$ttype}(d.dimen, dims...)
-                    rand!(d, A)
+                    d.ii += 1
+                    if d.ii > BUFFER_LENGTH
+                        ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, Int, $(argtypes...)),
+                            $constant, d.brng.stream_state[1], BUFFER_LENGTH, d.tmp, d.dimen, $(arguments.args...))
+                        d.ii = 1
+                    end
+                    d.tmp[:, d.ii]
                 end)
             )
         end
@@ -108,6 +110,7 @@ end
 @vsl_distribution_continuous(
     Uniform,
     [STD, STD_ACCURATE],
+    tmp::Vector{T1},
     a::T1,
     b::T1
 )
@@ -123,6 +126,7 @@ end
 @vsl_distribution_continuous(
     Gaussian,
     [BOXMULLER, BOXMULLER2, ICDF],
+    tmp::Vector{T1},
     a::T1,
     σ::T1
 )
@@ -144,6 +148,7 @@ end
 @vsl_distribution_continuous(
     GaussianMV,
     [BOXMULLER, BOXMULLER2, ICDF],
+    tmp::Matrix{T1},
     dimen::Int,
     mstorage::MatrixStorageType,
     a::Vector{T1},
@@ -161,6 +166,7 @@ end
 @vsl_distribution_continuous(
     Exponential,
     [ICDF, ICDF_ACCURATE],
+    tmp::Vector{T1},
     a::T1,
     β::T1
 )
@@ -176,6 +182,7 @@ end
 @vsl_distribution_continuous(
     Laplace,
     [ICDF],
+    tmp::Vector{T1},
     a::T1,
     β::T1
 )
@@ -191,6 +198,7 @@ end
 @vsl_distribution_continuous(
     Weibull,
     [ICDF, ICDF_ACCURATE],
+    tmp::Vector{T1},
     α::T1,
     a::T1,
     β::T1
@@ -207,6 +215,7 @@ end
 @vsl_distribution_continuous(
     Cauchy,
     [ICDF],
+    tmp::Vector{T1},
     a::T1,
     β::T1
 )
@@ -222,6 +231,7 @@ end
 @vsl_distribution_continuous(
     Rayleigh,
     [ICDF, ICDF_ACCURATE],
+    tmp::Vector{T1},
     a::T1,
     β::T1
 )
@@ -237,6 +247,7 @@ end
 @vsl_distribution_continuous(
     Lognormal,
     [BOXMULLER2, BOXMULLER2_ACCURATE, ICDF, ICDF_ACCURATE],
+    tmp::Vector{T1},
     a::T1,
     σ::T1,
     b::T1,
@@ -254,6 +265,7 @@ end
 @vsl_distribution_continuous(
     Gumbel,
     [ICDF],
+    tmp::Vector{T1},
     a::T1,
     β::T1
 )
@@ -269,6 +281,7 @@ end
 @vsl_distribution_continuous(
     Gamma,
     [GNORM, GNORM_ACCURATE],
+    tmp::Vector{T1},
     α::T1,
     a::T1,
     β::T1
@@ -285,6 +298,7 @@ end
 @vsl_distribution_continuous(
     Beta,
     [CJA, CJA_ACCURATE],
+    tmp::Vector{T1},
     p::T1,
     q::T1,
     a::T1,

@@ -9,8 +9,9 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
         push!(t.args, method)
     end
     code = quote
-        immutable $name{T<:$t} <: VSLDiscreteDistribution 
+        type $name{T<:$t} <: VSLDiscreteDistribution 
             brng::BasicRandomNumberGenerator
+            ii::Int
             tmp::Vector{$rtype}
         end
     end
@@ -22,7 +23,7 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
 
     push!(code.args, :(
         $name{T<:$t}(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T}) =
-        $name(brng, [$rtype(0)], $([property.args[1] for property in properties]...), method)
+        $name(brng, BUFFER_LENGTH, Vector{$rtype}(BUFFER_LENGTH), $([property.args[1] for property in properties]...), method)
     ))
 
     push!(code.args, :(
@@ -41,17 +42,29 @@ macro register_rand_functions_discrete(typename, name, methods, method_constants
         push!(
             code.args,
             :(function rand(d::$typename{$method}, ::Type{$rtype}=$rtype)
-                ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$rtype}, $(types.args...)),
-                      $constant, d.brng.stream_state[1], 1, d.tmp, $(arguments.args...))
-                d.tmp[1]
+                d.ii += 1
+                if d.ii > BUFFER_LENGTH
+                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$rtype}, $(types.args...)),
+                        $constant, d.brng.stream_state[1], BUFFER_LENGTH, d.tmp, $(arguments.args...))
+                    d.ii = 1
+                end
+                d.tmp[d.ii]
             end)
         )
         push!(
             code.args,
             :(function rand!(d::$typename{$method}, A::Array{$rtype})
                 n = length(A)
+                t = BUFFER_LENGTH - d.ii
+                if n <= t
+                    copy!(A, 1, d.tmp, d.ii + 1, n)
+                    d.ii = d.ii + n
+                    return A
+                end
+                copy!(A, 1, d.tmp, d.ii + 1, t)
+                d.ii = BUFFER_LENGTH
                 ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$rtype}, $(types.args...)),
-                      $constant, d.brng.stream_state[1], n, A, $(arguments.args...))
+                    $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))
                 A
             end)
         )
