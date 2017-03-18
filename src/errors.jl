@@ -3,7 +3,7 @@ macro vsl_error(code)
     _vsl_errors[code.args[2]] = code.args[1]
     return esc(parse("const $code"))
 end
-type VSLError <: Exception
+struct VSLError <: Exception
     errno :: Int32
     message :: AbstractString
 end

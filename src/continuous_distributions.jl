@@ -1,6 +1,6 @@
 import Base.Random: rand, rand!
 
-abstract VSLContinuousDistribution <: VSLDistribution
+abstract type VSLContinuousDistribution <: VSLDistribution end
 
 macro vsl_distribution_continuous(name, methods, tmp, properties...)
     t2 = :(Union{})
@@ -9,7 +9,7 @@ macro vsl_distribution_continuous(name, methods, tmp, properties...)
         push!(t2.args, method)
     end
     code = quote
-        type $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
+        mutable struct $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
             brng::BasicRandomNumberGenerator
             ii::Int
         end
@@ -75,7 +75,7 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
             )
             push!(
                 code.args,
-                :(rand(d::$name{$ttype, $method}, dims::Dims) = rand!(d, Array($ttype, dims)))
+                :(rand(d::$name{$ttype, $method}, dims::Dims) = rand!(d, Array{$ttype}(dims)))
             )
         end
     end

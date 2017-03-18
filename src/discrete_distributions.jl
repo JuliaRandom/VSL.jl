@@ -1,6 +1,6 @@
 import Base.Random: rand, rand!
 
-abstract VSLDiscreteDistribution <: VSLDistribution
+abstract type VSLDiscreteDistribution <: VSLDistribution end
 
 macro vsl_distribution_discrete(name, methods, rtype, properties...)
     t = :(Union{})
@@ -9,7 +9,7 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
         push!(t.args, method)
     end
     code = quote
-        type $name{T<:$t} <: VSLDiscreteDistribution 
+        mutable struct $name{T<:$t} <: VSLDiscreteDistribution
             brng::BasicRandomNumberGenerator
             ii::Int
             tmp::Vector{$rtype}
@@ -70,9 +70,9 @@ macro register_rand_functions_discrete(typename, name, methods, method_constants
         )
         push!(
             code.args,
-            :(rand(d::$typename{$method}, dims::Dims) = rand!(d, Array($rtype, dims)))
+            :(rand(d::$typename{$method}, dims::Dims) = rand!(d, Array{$rtype}(dims)))
         )
-    end
+    end 
     esc(code)
 end
 
