@@ -29,7 +29,7 @@ function BasicRandomNumberGenerator(brng_type::BRNGType, seed::UInt)
     if status ≠ VSL_STATUS_OK
         throw(VSL_ERROR(status))
     end
-    brng = new(brng_type, stream_state)
+    brng = BasicRandomNumberGenerator(brng_type, stream_state)
     finalizer(brng, brng_finalizer)
     brng
 end
@@ -40,7 +40,7 @@ function BasicRandomNumberGenerator(brng_type::BRNGType, seed::Vector{Cuint})
     if status ≠ VSL_STATUS_OK
         throw(VSL_ERROR(status))
     end
-    brng = new(brng_type, stream_state)
+    brng = BasicRandomNumberGenerator(brng_type, stream_state)
     finalizer(brng, brng_finalizer)
     brng
 end
