@@ -15,8 +15,5 @@ before_install:
     # only install mkl
     - . ~/.bashrc
 
-script:
-    - julia -e 'import Pkg; Pkg.clone(pwd()); Pkg.test("VSL", coverage=true)'
-
 after_success:
     - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
