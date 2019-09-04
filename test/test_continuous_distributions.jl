@@ -1,5 +1,5 @@
 brng_type = VSL_BRNG_MT19937
-info("Testing continuous distributions with $brng_type...")
+@info("Testing continuous distributions with $brng_type...")
 brng = BasicRandomNumberGenerator(brng_type, 200701281)
 
 stdout_ = STDOUT
