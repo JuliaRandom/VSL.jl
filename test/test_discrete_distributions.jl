@@ -4,7 +4,7 @@ brng = BasicRandomNumberGenerator(brng_type, 200701281)
 
 stdout_ = stdout
 pwd_ = pwd()
-cd(joinpath(Pkg.dir("VSL"), "test/"))
+cd(test_folder)
 mkpath("./actual")
 outfile = open("./actual/discrete.out", "w")
 redirect_stdout(outfile)

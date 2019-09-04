@@ -17,3 +17,5 @@ macro test_rand(expr)
         @printf "%.6f\n" values
     end
 end
+
+test_folder = joinpath(dirname(pathof(VSL)), "..", "test")
