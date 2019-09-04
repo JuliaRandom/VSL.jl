@@ -87,7 +87,7 @@ macro register_rand_functions_continuous_multivariate(name, methods, method_cons
     method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for ttype in (:Cfloat, :Cdouble)
         ctype = ttype == :Cfloat ? 's' : 'd'
-        argtypes = [parse(replace("$atype", "T1", "$ttype")) for atype in types.args]
+        argtypes = [Meta.parse(replace("$atype", "T1", "$ttype")) for atype in types.args]
         function_name = "v$(ctype)Rng$(name)"
         for (method, constant) in zip(method_symbols, method_constants.args)
             push!(

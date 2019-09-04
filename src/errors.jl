@@ -1,7 +1,7 @@
 _vsl_errors = Dict()
 macro vsl_error(code)
     _vsl_errors[code.args[2]] = code.args[1]
-    return esc(parse("const $code"))
+    return esc(Meta.parse("const $code"))
 end
 struct VSLError <: Exception
     errno :: Int32
