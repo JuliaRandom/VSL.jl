@@ -2,7 +2,7 @@ brng_type = VSL_BRNG_ARS5
 @info("Testing discrete distributions with $brng_type...")
 brng = BasicRandomNumberGenerator(brng_type, 200701281)
 
-stdout_ = STDOUT
+stdout_ = stdout
 pwd_ = pwd()
 cd(joinpath(Pkg.dir("VSL"), "test/"))
 mkpath("./actual")
