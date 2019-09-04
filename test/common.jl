@@ -1,5 +1,5 @@
 using VSL
-import Base.Test: @test
+import Test: @test
 
 brng_types = [
     VSL_BRNG_MCG31, VSL_BRNG_R250, VSL_BRNG_MRG32K3A, VSL_BRNG_MCG59, VSL_BRNG_WH, VSL_BRNG_SOBOL, VSL_BRNG_NIEDERR,

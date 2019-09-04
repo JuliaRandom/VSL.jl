@@ -1,4 +1,4 @@
-import Base.Random: rand, rand!
+import Random: rand, rand!
 
 abstract type VSLDiscreteDistribution <: VSLDistribution end
 
