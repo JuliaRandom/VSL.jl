@@ -17,42 +17,42 @@
       VSL_BRNG_PHILOX4X32X10 = 0x01000000
 )
 
-type BasicRandomNumberGenerator
+struct BasicRandomNumberGenerator
     brng_type::BRNGType
-    stream_state::Vector{Ptr{Void}}
-    function brng_finalizer(brng::BasicRandomNumberGenerator)
-        status = ccall((:vslDeleteStream, libmkl), Cint, (Ptr{Ptr{Void}},), brng.stream_state)
-        if status ≠ VSL_STATUS_OK
-            throw(VSL_ERROR(status))
-        end
-    end
-    function BasicRandomNumberGenerator(brng_type::BRNGType, seed::UInt)
-        stream_state = [Libc.malloc(sizeof(Ptr{Void}))]
-        status = ccall((:vslNewStream, libmkl), Cint, (Ptr{Ptr{Void}}, Int, UInt),
-                       stream_state, Int(brng_type), seed)
-        if status ≠ VSL_STATUS_OK
-            throw(VSL_ERROR(status))
-        end
-        brng = new(brng_type, stream_state)
-        finalizer(brng, brng_finalizer)
-        brng
-    end
-    function BasicRandomNumberGenerator(brng_type::BRNGType, seed::Vector{Cuint})
-        stream_state = [Libc.malloc(sizeof(Ptr{Void}))]
-        status = ccall((:vslNewStreamEx, libmkl), Cint, (Ptr{Ptr{Void}}, Int, UInt, Ptr{Cuint}),
-                 stream_state, Int(brng_type), length(seed), seed)
-        if status ≠ VSL_STATUS_OK
-            throw(VSL_ERROR(status))
-        end
-        brng = new(brng_type, stream_state)
-        finalizer(brng, brng_finalizer)
-        brng
-    end
-    BasicRandomNumberGenerator(brng_type::BRNGType, seed::Integer) =
-        BasicRandomNumberGenerator(brng_type, UInt(seed))
-    BasicRandomNumberGenerator{T<:Integer}(brng_type::BRNGType, seed::Vector{T}) =
-        BasicRandomNumberGenerator(brng_type, Vector{Cuint}(seed))
-    BasicRandomNumberGenerator(brng_type::BRNGType) =
-        BasicRandomNumberGenerator(brng_type, rand(RandomDevice()))
+    stream_state::Vector{Ptr{Cvoid}}
 end
 
+function BasicRandomNumberGenerator(brng_type::BRNGType, seed::UInt)
+    stream_state = [Libc.malloc(sizeof(Ptr{Cvoid}))]
+    status = ccall((:vslNewStream, libmkl), Cint, (Ptr{Ptr{Cvoid}}, Int, UInt),
+                   stream_state, Int(brng_type), seed)
+    if status ≠ VSL_STATUS_OK
+        throw(VSL_ERROR(status))
+    end
+    brng = new(brng_type, stream_state)
+    finalizer(brng, brng_finalizer)
+    brng
+end
+function BasicRandomNumberGenerator(brng_type::BRNGType, seed::Vector{Cuint})
+    stream_state = [Libc.malloc(sizeof(Ptr{Cvoid}))]
+    status = ccall((:vslNewStreamEx, libmkl), Cint, (Ptr{Ptr{Cvoid}}, Int, UInt, Ptr{Cuint}),
+             stream_state, Int(brng_type), length(seed), seed)
+    if status ≠ VSL_STATUS_OK
+        throw(VSL_ERROR(status))
+    end
+    brng = new(brng_type, stream_state)
+    finalizer(brng, brng_finalizer)
+    brng
+end
+BasicRandomNumberGenerator(brng_type::BRNGType, seed::Integer) =
+    BasicRandomNumberGenerator(brng_type, UInt(seed))
+BasicRandomNumberGenerator(brng_type::BRNGType, seed::Vector{T}) where {T<:Integer} =
+    BasicRandomNumberGenerator(brng_type, Vector{Cuint}(seed))
+BasicRandomNumberGenerator(brng_type::BRNGType) =
+    BasicRandomNumberGenerator(brng_type, rand(RandomDevice()))
+function brng_finalizer(brng::BasicRandomNumberGenerator)
+    status = ccall((:vslDeleteStream, libmkl), Cint, (Ptr{Ptr{Cvoid}},), brng.stream_state)
+    if status ≠ VSL_STATUS_OK
+        throw(VSL_ERROR(status))
+    end
+end

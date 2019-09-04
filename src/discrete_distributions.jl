@@ -22,7 +22,7 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
     push!(fields, :(method::Type{T}))
 
     push!(code.args, :(
-        $name{T<:$t}(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T}) =
+        $name(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T}) where {T<:$t} =
         $name(brng, BUFFER_LENGTH, Vector{$rtype}(BUFFER_LENGTH), $([property.args[1] for property in properties]...), method)
     ))
 
@@ -44,7 +44,7 @@ macro register_rand_functions_discrete(typename, name, methods, method_constants
             :(function rand(d::$typename{$method}, ::Type{$rtype}=$rtype)
                 d.ii += 1
                 if d.ii > BUFFER_LENGTH
-                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$rtype}, $(types.args...)),
+                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$rtype}, $(types.args...)),
                         $constant, d.brng.stream_state[1], BUFFER_LENGTH, d.tmp, $(arguments.args...))
                     d.ii = 1
                 end
@@ -63,7 +63,7 @@ macro register_rand_functions_discrete(typename, name, methods, method_constants
                 end
                 copy!(A, 1, d.tmp, d.ii + 1, t)
                 d.ii = BUFFER_LENGTH
-                ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$rtype}, $(types.args...)),
+                ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$rtype}, $(types.args...)),
                     $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))
                 A
             end)

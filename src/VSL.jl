@@ -30,6 +30,8 @@ module VSL
     include("brngs.jl")
     include("methods.jl")
 
+    import Random: AbstractRNG
+
     abstract type VSLDistribution <: AbstractRNG end
 
     include("continuous_distributions.jl")

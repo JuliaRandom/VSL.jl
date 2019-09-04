@@ -22,14 +22,14 @@ macro vsl_distribution_continuous(name, methods, tmp, properties...)
     push!(fields, :(method::Type{T2}))
 
     push!(code.args, :(
-        function $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2}(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T2})
+        function $name(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T2}) where {T1<:Union{Cfloat, Cdouble}, T2<:$t2}
             tmp = $(tmp.args[2].args[1] == :Vector ? :(Vector{T1}(BUFFER_LENGTH)) : :(Matrix{T1}(dimen, BUFFER_LENGTH)))
             $name(brng, BUFFER_LENGTH, tmp, $([property.args[1] for property in properties]...), method)
         end
     ))
 
     push!(code.args, :(
-        $name{T1<:Union{Cfloat, Cdouble}}(brng::BasicRandomNumberGenerator, $(properties...)) =
+        $name(brng::BasicRandomNumberGenerator, $(properties...)) where {T1<:Union{Cfloat, Cdouble}} =
         $name(brng, $([property.args[1] for property in properties]...), $(method_symbols[1]))
     ))
 
@@ -49,7 +49,7 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
                 :(function rand(d::$name{$ttype, $method}, ::Type{$ttype}=$ttype)
                     d.ii += 1
                     if d.ii > BUFFER_LENGTH
-                        ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, $(argtypes...)),
+                        ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$ttype}, $(argtypes...)),
                             $constant, d.brng.stream_state[1], BUFFER_LENGTH, d.tmp, $(arguments.args...))
                         d.ii = 1
                     end
@@ -68,7 +68,7 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
                     end
                     copy!(A, 1, d.tmp, d.ii + 1, t)
                     d.ii = BUFFER_LENGTH
-                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, $(argtypes...)),
+                    ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$ttype}, $(argtypes...)),
                         $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))
                     A
                 end)
@@ -87,7 +87,7 @@ macro register_rand_functions_continuous_multivariate(name, methods, method_cons
     method_symbols = [Symbol(string("VSL_RNG_METHOD_", method)) for method in methods.args]
     for ttype in (:Cfloat, :Cdouble)
         ctype = ttype == :Cfloat ? 's' : 'd'
-        argtypes = [Meta.parse(replace("$atype", "T1", "$ttype")) for atype in types.args]
+        argtypes = [Meta.parse(replace("$atype", "T1" => "$ttype")) for atype in types.args]
         function_name = "v$(ctype)Rng$(name)"
         for (method, constant) in zip(method_symbols, method_constants.args)
             push!(
@@ -95,7 +95,7 @@ macro register_rand_functions_continuous_multivariate(name, methods, method_cons
                 :(function rand(d::$name{$ttype, $method}, ::Type{Vector{$ttype}}=Vector{$ttype})
                     d.ii += 1
                     if d.ii > BUFFER_LENGTH
-                        ccall(($function_name, libmkl), Cint, (Int, Ptr{Void}, Int, Ptr{$ttype}, Int, $(argtypes...)),
+                        ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$ttype}, Int, $(argtypes...)),
                             $constant, d.brng.stream_state[1], BUFFER_LENGTH, d.tmp, d.dimen, $(arguments.args...))
                         d.ii = 1
                     end
