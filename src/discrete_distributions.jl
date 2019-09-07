@@ -23,7 +23,7 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
 
     push!(code.args, :(
         $name(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T}) where {T<:$t} =
-        $name(brng, BUFFER_LENGTH, Vector{$rtype}(BUFFER_LENGTH), $([property.args[1] for property in properties]...), method)
+        $name(brng, BUFFER_LENGTH, zeros($rtype, BUFFER_LENGTH), $([property.args[1] for property in properties]...), method)
     ))
 
     push!(code.args, :(

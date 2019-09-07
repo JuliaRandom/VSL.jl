@@ -23,7 +23,7 @@ macro vsl_distribution_continuous(name, methods, tmp, properties...)
 
     push!(code.args, :(
         function $name(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T2}) where {T1<:Union{Cfloat, Cdouble}, T2<:$t2}
-            tmp = $(tmp.args[2].args[1] == :Vector ? :(Vector{T1}(BUFFER_LENGTH)) : :(Matrix{T1}(dimen, BUFFER_LENGTH)))
+            tmp = $(tmp.args[2].args[1] == :Vector ? :(zeros(T1, BUFFER_LENGTH)) : :(zeros(T1, dimen, BUFFER_LENGTH)))
             $name(brng, BUFFER_LENGTH, tmp, $([property.args[1] for property in properties]...), method)
         end
     ))
