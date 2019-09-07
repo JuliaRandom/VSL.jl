@@ -62,11 +62,11 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
                     n = length(A)
                     t = BUFFER_LENGTH - d.ii
                     if n <= t
-                        copy!(A, 1, d.tmp, d.ii + 1, n)
+                        copyto!(A, 1, d.tmp, d.ii + 1, n)
                         d.ii = d.ii + n
                         return A
                     end
-                    copy!(A, 1, d.tmp, d.ii + 1, t)
+                    copyto!(A, 1, d.tmp, d.ii + 1, t)
                     d.ii = BUFFER_LENGTH
                     ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$ttype}, $(argtypes...)),
                         $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))
