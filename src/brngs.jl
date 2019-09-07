@@ -17,7 +17,7 @@
       VSL_BRNG_PHILOX4X32X10 = 0x01000000
 )
 
-struct BasicRandomNumberGenerator
+mutable struct BasicRandomNumberGenerator
     brng_type::BRNGType
     stream_state::Vector{Ptr{Cvoid}}
 end
@@ -29,8 +29,8 @@ function BasicRandomNumberGenerator(brng_type::BRNGType, seed::UInt)
     if status ≠ VSL_STATUS_OK
         throw(VSL_ERROR(status))
     end
-    brng = new(brng_type, stream_state)
-    finalizer(brng, brng_finalizer)
+    brng = BasicRandomNumberGenerator(brng_type, stream_state)
+    finalizer(brng_finalizer, brng)
     brng
 end
 function BasicRandomNumberGenerator(brng_type::BRNGType, seed::Vector{Cuint})
@@ -40,8 +40,8 @@ function BasicRandomNumberGenerator(brng_type::BRNGType, seed::Vector{Cuint})
     if status ≠ VSL_STATUS_OK
         throw(VSL_ERROR(status))
     end
-    brng = new(brng_type, stream_state)
-    finalizer(brng, brng_finalizer)
+    brng = BasicRandomNumberGenerator(brng_type, stream_state)
+    finalizer(brng_finalizer, brng)
     brng
 end
 BasicRandomNumberGenerator(brng_type::BRNGType, seed::Integer) =

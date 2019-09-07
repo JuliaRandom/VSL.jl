@@ -1,6 +1,6 @@
 import Random: rand, rand!
 
-abstract type VSLDiscreteDistribution <: VSLDistribution end
+abstract type VSLDiscreteDistribution{T} <: VSLDistribution{T} end
 
 macro vsl_distribution_discrete(name, methods, rtype, properties...)
     t = :(Union{})
@@ -9,7 +9,7 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
         push!(t.args, method)
     end
     code = quote
-        mutable struct $name{T<:$t} <: VSLDiscreteDistribution
+        mutable struct $name{T<:$t} <: VSLDiscreteDistribution{$rtype}
             brng::BasicRandomNumberGenerator
             ii::Int
             tmp::Vector{$rtype}
@@ -23,7 +23,7 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
 
     push!(code.args, :(
         $name(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T}) where {T<:$t} =
-        $name(brng, BUFFER_LENGTH, Vector{$rtype}(BUFFER_LENGTH), $([property.args[1] for property in properties]...), method)
+        $name(brng, BUFFER_LENGTH, zeros($rtype, BUFFER_LENGTH), $([property.args[1] for property in properties]...), method)
     ))
 
     push!(code.args, :(
@@ -53,15 +53,15 @@ macro register_rand_functions_discrete(typename, name, methods, method_constants
         )
         push!(
             code.args,
-            :(function rand!(d::$typename{$method}, A::Array{$rtype})
+            :(function rand!(d::$typename{$method}, A::Array{$rtype}, ::Type{$rtype}=$rtype)
                 n = length(A)
                 t = BUFFER_LENGTH - d.ii
                 if n <= t
-                    copy!(A, 1, d.tmp, d.ii + 1, n)
+                    copyto!(A, 1, d.tmp, d.ii + 1, n)
                     d.ii = d.ii + n
                     return A
                 end
-                copy!(A, 1, d.tmp, d.ii + 1, t)
+                copyto!(A, 1, d.tmp, d.ii + 1, t)
                 d.ii = BUFFER_LENGTH
                 ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$rtype}, $(types.args...)),
                     $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))

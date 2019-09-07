@@ -1,6 +1,6 @@
 import Random: rand, rand!
 
-abstract type VSLContinuousDistribution <: VSLDistribution end
+abstract type VSLContinuousDistribution{T} <: VSLDistribution{T} end
 
 macro vsl_distribution_continuous(name, methods, tmp, properties...)
     t2 = :(Union{})
@@ -9,7 +9,7 @@ macro vsl_distribution_continuous(name, methods, tmp, properties...)
         push!(t2.args, method)
     end
     code = quote
-        mutable struct $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
+        mutable struct $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution{T1}
             brng::BasicRandomNumberGenerator
             ii::Int
         end
@@ -23,7 +23,7 @@ macro vsl_distribution_continuous(name, methods, tmp, properties...)
 
     push!(code.args, :(
         function $name(brng::BasicRandomNumberGenerator, $(properties...), method::Type{T2}) where {T1<:Union{Cfloat, Cdouble}, T2<:$t2}
-            tmp = $(tmp.args[2].args[1] == :Vector ? :(Vector{T1}(BUFFER_LENGTH)) : :(Matrix{T1}(dimen, BUFFER_LENGTH)))
+            tmp = $(tmp.args[2].args[1] == :Vector ? :(zeros(T1, BUFFER_LENGTH)) : :(zeros(T1, dimen, BUFFER_LENGTH)))
             $name(brng, BUFFER_LENGTH, tmp, $([property.args[1] for property in properties]...), method)
         end
     ))
@@ -58,24 +58,20 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
             )
             push!(
                 code.args,
-                :(function rand!(d::$name{$ttype, $method}, A::Array{$ttype})
+                :(function rand!(d::$name{$ttype, $method}, A::AbstractArray{$ttype}, ::Type{$ttype}=$ttype)
                     n = length(A)
                     t = BUFFER_LENGTH - d.ii
                     if n <= t
-                        copy!(A, 1, d.tmp, d.ii + 1, n)
+                        copyto!(A, 1, d.tmp, d.ii + 1, n)
                         d.ii = d.ii + n
                         return A
                     end
-                    copy!(A, 1, d.tmp, d.ii + 1, t)
+                    copyto!(A, 1, d.tmp, d.ii + 1, t)
                     d.ii = BUFFER_LENGTH
                     ccall(($function_name, libmkl), Cint, (Int, Ptr{Cvoid}, Int, Ptr{$ttype}, $(argtypes...)),
                         $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))
                     A
                 end)
-            )
-            push!(
-                code.args,
-                :(rand(d::$name{$ttype, $method}, dims::Dims) = rand!(d, Array{$ttype}(dims)))
             )
         end
     end

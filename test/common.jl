@@ -1,5 +1,6 @@
 using VSL
-import Test: @test
+import Random: rand, rand!
+import Test: @test, @test_throws
 import Printf: @printf
 
 brng_types = [
@@ -17,3 +18,5 @@ macro test_rand(expr)
         @printf "%.6f\n" values
     end
 end
+
+test_folder = joinpath(dirname(pathof(VSL)), "..", "test")

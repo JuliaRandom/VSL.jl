@@ -2,9 +2,9 @@ brng_type = VSL_BRNG_ARS5
 @info("Testing discrete distributions with $brng_type...")
 brng = BasicRandomNumberGenerator(brng_type, 200701281)
 
-stdout_ = STDOUT
+stdout_ = stdout
 pwd_ = pwd()
-cd(joinpath(Pkg.dir("VSL"), "test/"))
+cd(test_folder)
 mkpath("./actual")
 outfile = open("./actual/discrete.out", "w")
 redirect_stdout(outfile)
@@ -12,6 +12,9 @@ redirect_stdout(outfile)
 t_uniform = UniformDiscrete(brng, Cint(1), Cint(10))
 @test_rand(rand(t_uniform))
 @test_rand(rand(t_uniform, 2, 3))
+
+@test_throws ErrorException rand(t_uniform, Float64)
+@test_throws ErrorException rand!(t_uniform, zeros(Float64, 5))
 
 t_uniform_bits = UniformBits(brng)
 @test_rand(rand(t_uniform_bits))

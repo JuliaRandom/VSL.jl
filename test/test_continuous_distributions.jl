@@ -2,9 +2,9 @@ brng_type = VSL_BRNG_MT19937
 @info("Testing continuous distributions with $brng_type...")
 brng = BasicRandomNumberGenerator(brng_type, 200701281)
 
-stdout_ = STDOUT
+stdout_ = stdout
 pwd_ = pwd()
-cd(joinpath(Pkg.dir("VSL"), "test/"))
+cd(test_folder)
 mkpath("./actual")
 outfile = open("./actual/continuous.out", "w")
 redirect_stdout(outfile)
@@ -12,6 +12,9 @@ redirect_stdout(outfile)
 t_uniform = Uniform(brng, 1.0, 5.0, VSL_RNG_METHOD_STD)
 @test_rand(rand(t_uniform)) 
 @test_rand(rand(t_uniform, 2, 3))
+
+@test_throws ErrorException rand(t_uniform, UInt64)
+@test_throws ErrorException rand!(t_uniform, zeros(UInt64, 5))
 
 t_uniform_s = Uniform(brng, 1.0f0, 5.0f0, VSL_RNG_METHOD_STD)
 @test_rand(rand(t_uniform_s))
