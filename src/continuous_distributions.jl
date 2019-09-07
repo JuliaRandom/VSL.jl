@@ -1,6 +1,6 @@
 import Random: rand, rand!
 
-abstract type VSLContinuousDistribution{T1<:Union{Cfloat, Cdouble}} <: VSLDistribution end
+abstract type VSLContinuousDistribution{T} <: VSLDistribution{T} end
 
 macro vsl_distribution_continuous(name, methods, tmp, properties...)
     t2 = :(Union{})
@@ -308,12 +308,3 @@ end
     [T1, T1, T1, T1],
     [d.p, d.q, d.a, d.β]
 )
-
-function rand(d::VSLContinuousDistribution{T}, ::Type{X}) where {T, X}
-    error("Only $(T) type is supported for $d.")
-end
-
-function rand!(d::VSLContinuousDistribution{T}, A::AbstractArray{K}, ::Type{X}=T) where {T, K, X}
-    # T !== K || T !== X
-    error("Only $(T) type is supported for $d.")
-end

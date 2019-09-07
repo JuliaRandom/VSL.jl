@@ -1,6 +1,6 @@
 import Random: rand, rand!
 
-abstract type VSLDiscreteDistribution{T} <: VSLDistribution end
+abstract type VSLDiscreteDistribution{T} <: VSLDistribution{T} end
 
 macro vsl_distribution_discrete(name, methods, rtype, properties...)
     t = :(Union{})
@@ -264,13 +264,3 @@ end
     [Cdouble, Cdouble],
     [d.a, d.p]
 )
-
-function rand(d::VSLDiscreteDistribution{T}, ::Type{X}) where {T, X}
-    error("Only $(T) type is supported for $d.")
-end
-
-function rand!(d::VSLDiscreteDistribution{T}, A::AbstractArray{K}, ::Type{X}=T) where {T, K, X}
-    # T !== K || T !== X
-    error("Only $(T) type is supported for $d.")
-end
-
