@@ -1,6 +1,6 @@
 import Random: rand, rand!
 
-abstract type VSLContinuousDistribution <: VSLDistribution end
+abstract type VSLContinuousDistribution{T1<:Union{Cfloat, Cdouble}} <: VSLDistribution end
 
 macro vsl_distribution_continuous(name, methods, tmp, properties...)
     t2 = :(Union{})
@@ -9,7 +9,7 @@ macro vsl_distribution_continuous(name, methods, tmp, properties...)
         push!(t2.args, method)
     end
     code = quote
-        mutable struct $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution
+        mutable struct $name{T1<:Union{Cfloat, Cdouble}, T2<:$t2} <: VSLContinuousDistribution{T1}
             brng::BasicRandomNumberGenerator
             ii::Int
         end
@@ -58,7 +58,7 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
             )
             push!(
                 code.args,
-                :(function rand!(d::$name{$ttype, $method}, A::Array{$ttype})
+                :(function rand!(d::$name{$ttype, $method}, A::AbstractArray{$ttype}, ::Type{$ttype}=$ttype)
                     n = length(A)
                     t = BUFFER_LENGTH - d.ii
                     if n <= t
@@ -72,10 +72,6 @@ macro register_rand_functions_continuous(name, methods, method_constants, types,
                         $constant, d.brng.stream_state[1], n - t, view(A, t+1:n), $(arguments.args...))
                     A
                 end)
-            )
-            push!(
-                code.args,
-                :(rand(d::$name{$ttype, $method}, dims::Dims) = rand!(d, Array{$ttype}(dims)))
             )
         end
     end
@@ -312,3 +308,12 @@ end
     [T1, T1, T1, T1],
     [d.p, d.q, d.a, d.β]
 )
+
+function rand(d::VSLContinuousDistribution{T}, ::Type{X}) where {T, X}
+    error("Only $(T) type is supported for $d.")
+end
+
+function rand!(d::VSLContinuousDistribution{T}, A::AbstractArray{K}, ::Type{X}=T) where {T, K, X}
+    # T !== K || T !== X
+    error("Only $(T) type is supported for $d.")
+end

@@ -1,5 +1,6 @@
 using VSL
-import Test: @test
+import Random: rand, rand!
+import Test: @test, @test_throws
 import Printf: @printf
 
 brng_types = [

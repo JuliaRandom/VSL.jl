@@ -1,6 +1,6 @@
 import Random: rand, rand!
 
-abstract type VSLDiscreteDistribution <: VSLDistribution end
+abstract type VSLDiscreteDistribution{T} <: VSLDistribution end
 
 macro vsl_distribution_discrete(name, methods, rtype, properties...)
     t = :(Union{})
@@ -9,7 +9,7 @@ macro vsl_distribution_discrete(name, methods, rtype, properties...)
         push!(t.args, method)
     end
     code = quote
-        mutable struct $name{T<:$t} <: VSLDiscreteDistribution
+        mutable struct $name{T<:$t} <: VSLDiscreteDistribution{$rtype}
             brng::BasicRandomNumberGenerator
             ii::Int
             tmp::Vector{$rtype}
@@ -53,7 +53,7 @@ macro register_rand_functions_discrete(typename, name, methods, method_constants
         )
         push!(
             code.args,
-            :(function rand!(d::$typename{$method}, A::Array{$rtype})
+            :(function rand!(d::$typename{$method}, A::Array{$rtype}, ::Type{$rtype}=$rtype)
                 n = length(A)
                 t = BUFFER_LENGTH - d.ii
                 if n <= t
@@ -264,3 +264,13 @@ end
     [Cdouble, Cdouble],
     [d.a, d.p]
 )
+
+function rand(d::VSLDiscreteDistribution{T}, ::Type{X}) where {T, X}
+    error("Only $(T) type is supported for $d.")
+end
+
+function rand!(d::VSLDiscreteDistribution{T}, A::AbstractArray{K}, ::Type{X}=T) where {T, K, X}
+    # T !== K || T !== X
+    error("Only $(T) type is supported for $d.")
+end
+

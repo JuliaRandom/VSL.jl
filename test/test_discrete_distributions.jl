@@ -13,6 +13,9 @@ t_uniform = UniformDiscrete(brng, Cint(1), Cint(10))
 @test_rand(rand(t_uniform))
 @test_rand(rand(t_uniform, 2, 3))
 
+@test_throws ErrorException rand(t_uniform, Float64)
+@test_throws ErrorException rand!(t_uniform, zeros(Float64, 5))
+
 t_uniform_bits = UniformBits(brng)
 @test_rand(rand(t_uniform_bits))
 @test_rand(rand(t_uniform_bits, 2, 3))
