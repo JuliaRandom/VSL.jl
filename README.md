@@ -1,6 +1,6 @@
 # VSL.jl
-[![Build Status](https://travis-ci.org/sunoru/VSL.jl.svg?branch=master)](https://travis-ci.org/sunoru/VSL.jl)
-[![codecov](https://codecov.io/gh/sunoru/VSL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sunoru/VSL.jl)
+[![Build Status](https://travis-ci.org/JuliaRandom/VSL.jl.svg?branch=master)](https://travis-ci.org/sunoru/VSL.jl)
+[![codecov](https://codecov.io/gh/JuliaRandom/VSL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sunoru/VSL.jl)
 
 This package provides bindings to the Intel Vector Statistics Library.
 
@@ -74,4 +74,4 @@ For more information, please refer to the
 
 ## License
 
-[MIT license](https://sunoru.mit-license.org)
+[MIT license](https://JuliaRandom.mit-license.org)
