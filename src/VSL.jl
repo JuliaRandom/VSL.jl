@@ -22,7 +22,8 @@ module VSL
            UniformDiscrete, UniformBits, UniformBits32, UniformBits64, Bernoulli, Geometric, Binomial, Hypergeometric,
            Poisson, PoissonV, NegBinomial
 
-    const libmkl = :libmkl_rt
+    import MKL_jll
+    const libmkl = MKL_jll.libmkl_rt
 
     const BUFFER_LENGTH = 16
 
