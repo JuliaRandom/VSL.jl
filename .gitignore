@@ -2,3 +2,5 @@
 *.cov
 build/
 actual/
+
+Manifest.toml
