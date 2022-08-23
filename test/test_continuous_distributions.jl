@@ -1,71 +1,66 @@
+using VSL
+using Random, Test
+
+@testset "Continuous" begin
+
 brng_type = VSL_BRNG_MT19937
 @info("Testing continuous distributions with $brng_type...")
+
 brng = BasicRandomNumberGenerator(brng_type, 200701281)
-
-stdout_ = stdout
-pwd_ = pwd()
-cd(test_folder)
-mkpath("./actual")
-outfile = open("./actual/continuous.out", "w")
-redirect_stdout(outfile)
-
 t_uniform = Uniform(brng, 1.0, 5.0, VSL_RNG_METHOD_STD)
-@test_rand(rand(t_uniform)) 
-@test_rand(rand(t_uniform, 2, 3))
+@test rand(t_uniform) ≈ 2.322448899038136
+@test rand(t_uniform, 2, 3) ≈ [2.095937419682741 1.384681923314929 3.5385020431131124; 2.722409107722342 3.2286222940310836 3.492045565508306]
 
 @test_throws ErrorException rand(t_uniform, UInt64)
 @test_throws ErrorException rand!(t_uniform, zeros(UInt64, 5))
 
 t_uniform_s = Uniform(brng, 1.0f0, 5.0f0, VSL_RNG_METHOD_STD)
-@test_rand(rand(t_uniform_s))
-@test_rand(rand(t_uniform_s, 2, 3))
+
+@test rand(t_uniform_s) ≈ 3.7430916f0
+@test rand(t_uniform_s, 2, 3) ≈ Float32[2.186183 3.4236805 4.2433987; 1.3960528 2.4837372 3.4296734]
 
 t_gaussian = Gaussian(brng, 0.0, 2.0, VSL_RNG_METHOD_BOXMULLER)
-@test_rand(rand(t_gaussian))
-@test_rand(rand(t_gaussian, 2, 3))
+@test rand(t_gaussian) ≈ -1.411076846930821
+@test rand(t_gaussian, 2, 3) ≈ [1.8462998766196428 0.5691076706683562 2.156390023076253; -0.8982922912619158 -2.632402335881424 -1.222991786642376]
 
 t_gaussianmv = GaussianMV(brng, 3, VSL.VSL_MATRIX_STORAGE_FULL,
                           Float64[1,2,3], Float64[1 2 3; 1 2 3; 1 2 3], VSL_RNG_METHOD_BOXMULLER)
-@test_rand(rand(t_gaussianmv))
+@test rand(t_gaussianmv) ≈ [1.4425266798387189, 3.1270600463677187, 5.655656923970678]
 
 t_exponential = Exponential(brng, 1.0, 5.0, VSL_RNG_METHOD_ICDF_ACCURATE)
-@test_rand(rand(t_exponential))
-@test_rand(rand(t_exponential, 2, 3))
+@test rand(t_exponential) ≈ 6.67499915009241
+@test rand(t_exponential, 2, 3) ≈ [5.96725203422635 11.226870529846718 2.4921884634910794; 1.128572813340893 2.4830743231111096 4.631285229057123]
 
 t_laplace = Laplace(brng, 1.0, 5.0, VSL_RNG_METHOD_ICDF)
-@test_rand(rand(t_laplace))
-@test_rand(rand(t_laplace, 2, 3))
+@test rand(t_laplace) ≈ 11.367672767377677
+@test rand(t_laplace, 2, 3) ≈ [4.576845868925089 -12.542357927565664 -0.20733408484644908; 0.26770061857362937 10.515075390440003 0.2348754340145485]
 
 t_weibull = Weibull(brng, 2.0, 1.0, 5.0, VSL_RNG_METHOD_ICDF)
-@test_rand(rand(t_weibull))
-@test_rand(rand(t_weibull, 2, 3))
+@test rand(t_weibull) ≈ 10.402882479532227
+@test rand(t_weibull, 2, 3) ≈ [6.379576735150491 6.013007087889378 3.695339312620451; 8.399651657081659 4.445025692527484 6.4341850296751835]
 
 t_cauchy = Cauchy(brng, 1.0, 5.0, VSL_RNG_METHOD_ICDF)
-@test_rand(rand(t_cauchy))
-@test_rand(rand(t_cauchy, 2, 3))
+@test rand(t_cauchy) ≈ 2.01607991081857
+@test rand(t_cauchy, 2, 3) ≈ [1.4396483876563202 -1.489646964912514 -0.4222870296985546; 9.239595347068317 -1.4229029411123724 18.115034611300942]
 
 t_rayleigh = Rayleigh(brng, 1.0, 5.0, VSL_RNG_METHOD_ICDF)
-@test_rand(rand(t_rayleigh))
-@test_rand(rand(t_rayleigh, 2, 3))
+@test rand(t_rayleigh) ≈ 6.240194579564053
+@test rand(t_rayleigh, 2, 3) ≈ [8.132545433805932 3.7830369469591405 6.932765550443401; 3.7015691206652437 1.9006160053977996 5.248364021780636]
 
 t_lognormal = Lognormal(brng, 1.0, 5.0, 1.0, 5.0, VSL_RNG_METHOD_BOXMULLER2_ACCURATE)
-@test_rand(rand(t_lognormal))
-@test_rand(rand(t_lognormal, 2, 3))
+@test rand(t_lognormal) ≈ 934.4813593884941
+@test rand(t_lognormal, 2, 3) ≈ [47.75357362974482 479.9178471184096 2594.2781933689216; 3563.2739490799177 18978.008039510103 55.16360839366214]
 
 t_gumbel = Gumbel(brng, 1.0, 5.0, VSL_RNG_METHOD_ICDF)
-@test_rand(rand(t_gumbel))
-@test_rand(rand(t_gumbel, 2, 3))
+@test rand(t_gumbel) ≈ 2.7414156514403007
+@test rand(t_gumbel, 2, 3) ≈ [-24.423716423475497 1.0313707043078515 -10.341306694413598; 6.051178482818145 -0.6089659248738614 -5.233281897584528]
 
 t_gamma = Gamma(brng, 2.0, 1.0, 5.0, VSL_RNG_METHOD_GNORM)
-@test_rand(rand(t_gamma))
-@test_rand(rand(t_gamma, 2, 3))
+@test rand(t_gamma) ≈ 14.034194571894698
+@test rand(t_gamma, 2, 3) ≈ [8.47137843162102 5.404613823312032 23.345312353294556; 15.305457117382472 5.959479240125466 1.6177546258513218]
 
 t_beta = Beta(brng, 3.0, 2.0, 1.0, 5.0, VSL_RNG_METHOD_CJA_ACCURATE)
-@test_rand(rand(t_beta))
-@test_rand(rand(t_beta, 2, 3))
+@test rand(t_beta) ≈ 3.902589847666027
+@test rand(t_beta, 2, 3) ≈ [4.261122627109092 5.075219314820006 4.547380877241976; 4.159941465250321 2.639780429150605 5.39623298168557]
 
-close(outfile)
-redirect_stdout(stdout_)
-
-@test success(`diff ./expected/continuous.out ./actual/continuous.out`)
-cd(pwd_)
+end
