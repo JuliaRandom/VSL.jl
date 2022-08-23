@@ -1,6 +1,6 @@
 # VSL.jl
-[![Build Status](https://travis-ci.org/JuliaRandom/VSL.jl.svg?branch=master)](https://travis-ci.org/sunoru/VSL.jl)
-[![codecov](https://codecov.io/gh/JuliaRandom/VSL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sunoru/VSL.jl)
+[![CI Build](https://github.com/JuliaRandom/VSL.jl/actions/workflows/build.yml/badge.svg)](https://github.com/JuliaRandom/VSL.jl/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/JuliaRandom/VSL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaRandom/VSL.jl)
 
 This package provides bindings to the [Intel Vector Statistics Library](https://www.intel.com/content/www/us/en/develop/documentation/onemkl-vsnotes/top.html).
 
