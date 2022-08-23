@@ -2,14 +2,20 @@
 [![Build Status](https://travis-ci.org/JuliaRandom/VSL.jl.svg?branch=master)](https://travis-ci.org/sunoru/VSL.jl)
 [![codecov](https://codecov.io/gh/JuliaRandom/VSL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sunoru/VSL.jl)
 
-This package provides bindings to the Intel Vector Statistics Library.
+This package provides bindings to the [Intel Vector Statistics Library](https://www.intel.com/content/www/us/en/develop/documentation/onemkl-vsnotes/top.html).
 
-## Using VSL.jl
+## Installation
 
-You must have the [Intel® Math Kernel Library](http://software.intel.com/en-us/intel-mkl) installed to use VSL.jl, and
-the shared library must be in a directory known to the linker.
+```julia
+]add VSL
+```
 
-VSL.jl provides several basic random number generators (BRNGs) and distributions, and each distribution has at least
+Julia v1.7+ is required to install `VSL.jl`. and [`MKL_jll.jl`](https://github.com/JuliaBinaryWrappers/MKL_jll.jl)
+will be downloaded automatically.
+
+## Usage
+
+`VSL.jl` provides several basic random number generators (BRNGs) and distributions, and each distribution has at least
 one method to generate random number. After VSL.jl loaded, you can use the distributions such like the followings:
 
 ```julia
@@ -26,7 +32,7 @@ julia> rand(u) # Generate one random number.
 julia> rand(u, 2, 3) # Generate an random 2*3 array.
 2×3 Array{Float64,2}:
  0.732685   0.820175  0.802848
- 0.0101692  0.825207  0.29864 
+ 0.0101692  0.825207  0.29864
 
 julia> A = Array{Float64}(undef, 3, 4);
 
@@ -69,7 +75,7 @@ Discrete: `UniformDiscrete`, `UniformBits`, `UniformBits32`, `UniformBits64`, `B
 
 Most of the discrete distributions return values of 32-bit integer. Please be careful when using those distributions.
 
-For more information, please refer to the 
+For more information, please refer to the
 [Intel® Math Kernel Library Developer Reference](https://software.intel.com/en-us/articles/mkl-reference-manual)
 
 ## License
