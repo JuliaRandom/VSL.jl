@@ -9,11 +9,11 @@ This package provides bindings to the Intel Vector Statistics Library.
 You must have the [Intel® Math Kernel Library](http://software.intel.com/en-us/intel-mkl) installed to use VSL.jl, and
 the shared library must be in a directory known to the linker.
 
-VML.jl provides several basic random number generators (BRNGs) and distributions, and each distribution has at least
+VSL.jl provides several basic random number generators (BRNGs) and distributions, and each distribution has at least
 one method to generate random number. After VSL.jl loaded, you can use the distributions such like the followings:
 
 ```julia
-julia> using VSL
+julia> using VSL, Random
 
 julia> brng = BasicRandomNumberGenerator(VSL_BRNG_MT19937, 12345);
 # A BRNG created, in which 12345 is the random seed.
@@ -28,7 +28,7 @@ julia> rand(u, 2, 3) # Generate an random 2*3 array.
  0.732685   0.820175  0.802848
  0.0101692  0.825207  0.29864 
 
-julia> A = Array{Float64}(3, 4);
+julia> A = Array{Float64}(undef, 3, 4);
 
 julia> rand!(u, A) # Fill an array with random numbers.
 3×4 Array{Float64,2}:
